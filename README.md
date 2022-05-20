@@ -1,3 +1,7 @@
+# Setup
+
+Download the Spider dataset and put the data in `datasets` folder in the root directory
+
 # Generate-and-Rank strategy by detecting low-confidence steps in Seq2Seq translation
 
 # Postprocessing on model raw output
