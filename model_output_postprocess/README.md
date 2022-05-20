@@ -10,7 +10,7 @@ The output **JSON** file contains the prediction results of the model for Spider
 - (optional) `gold_query_toks_no_value`: the ground truth SQL query tokens corresponding to the question
 - (optional) `exact`: if the inferred query matches the gold one
 
-:bulb
+:bulb:
 1. Make sure all SQL keywords (e.g. **SELECT, COUNT** etc.) in `inferred_query` and `inferred_query_with_marks` fieds are upper-cased;
 2. Make sure all the values in SQL are represented with **single quotes**;
 3. All the columns are represented with **table.column**.
