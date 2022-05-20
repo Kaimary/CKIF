@@ -21,7 +21,7 @@ Using the following command to do the inference,
 bash test_pipeline.sh <benchmark name> <seq2seq model name> <seq2seq model output file> <dev/test json file> <gold sql txt file> <table schema json file> <sqlite database directory>
 ```
 
-### Output
+### Output files
 All the outputs of the inference will be located in the `output/spider/reranker` directory and saved in a folder using the following naming convention, 
 `<benchmark_name>_<model_name>_<candidate_num>_<retrieval_model_name>_<reranker_embedding_name><reranker_model_name>` 
 
