@@ -1,4 +1,4 @@
-# Generate-and-Rank strategy by detecting low-confidence steps in Seq2Seq translation
+# Generate-and-Rank strategy for Sequence-to-Sequence Semantic Parsers
 
 ## Setup
 
