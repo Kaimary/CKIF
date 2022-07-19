@@ -14,7 +14,7 @@ from datagen.sqlgenv2.utils.helper import fix_missing_join_condition
 # @click.argument("tables_file", type=click.Path(exists=True, dir_okay=False))
 # @click.argument("validation", type=click.BOOL, default=True)
 def main(model_name, model_output_file, test_file, tables_file, validation):
-    assert model_name in ['gap', 'ratsql', 'bridge', 'natsql', 'gnn']
+    assert model_name in ['gap', 'ratsql', 'bridge', 'natsql', 'lgesql', 'lgesql_electra']
 
     inferred = open(model_output_file)
     test_instances = json.load(open(test_file))
@@ -60,12 +60,21 @@ def main(model_name, model_output_file, test_file, tables_file, validation):
             data['inferred_query'] = sql_string_format(ex['inferred_query'])
             data['inferred_query_with_marks'] = sql_string_format(ex['inferred_query_with_marks'])
             instances.append(data)
+    elif model_name == 'lgesql' or model_name == 'lgesql_electra':
+        json_obj = json.load(inferred)
+        for idx, ex in enumerate(tqdm(json_obj)):
+            data = ex
+            inferred_query = sql_string_format(ex['inferred_query'])
+            inferred_query_with_marks = sql_string_format(ex['inferred_query_with_marks'])
+            data['inferred_query'] = fix_missing_join_condition(inferred_query, data['db_id'], tables_file)
+            data['inferred_query_with_marks'] = fix_missing_join_condition(inferred_query_with_marks, data['db_id'], tables_file)
+            instances.append(data)
             
     json.dump(instances, output, indent=4)
 
 
 if __name__ == "__main__":
-    main('ratsql', 
-    'model_output_postprocess/outputs/ratsql/bert_run_true_1-step34100.infer', 
+    main('lgesql_electra', 
+    'model_output_postprocess/outputs/lgesql_electra/lgesql_electra_dev_raw_output.json', 
     'datasets/spider/dev.json', 'datasets/spider/tables.json', 
-    validation=True)
+    validation=False)

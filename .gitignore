@@ -162,3 +162,13 @@ cython_debug/
 datasets/
 output/spider/
 .vscode/
+candidate_filter_top10_debug.py
+test.py
+model_output_postprocess/outputs/bridge/bridge_dev_lc2_beam1.json
+model_output_postprocess/outputs/bridge/bridge_dev_output_lc2.json
+model_output_postprocess/outputs/bridge/bridge_dev_output.json
+model_output_postprocess/outputs/bridge/bridge_dev_raw_output_lc2_backup.json
+model_output_postprocess/outputs/bridge/bridge_dev_raw_output_lc2.json
+model_output_postprocess/outputs/bridge/bridge_dev_raw_output.json
+model_output_postprocess/outputs/bridge/bridge_output.json
+model_output_postprocess/outputs/bridge/preds.txt

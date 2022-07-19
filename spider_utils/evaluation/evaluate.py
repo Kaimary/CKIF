@@ -428,7 +428,7 @@ class Evaluator:
                             bFind = True
                             break
                 if not bFind: 
-                    return True
+                    return False
             # if label_joins != pred_joins:
             #     return False
         return 1

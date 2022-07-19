@@ -10,9 +10,9 @@ QUNITS_SET_COVER_MINUS_FILE='/output/{0}/{0}_{1}_qunits_set_generated_cover.json
 # Generalization
 TRIAL_KNOB=1000
 # Retrieval mdel
-RETRIEVAL_MODEL_EMBEDDING_DIMENSION=768
-RETRIEVAL_EMBEDDING_MODEL_NAME='nli-distilroberta-base-v2'
-SEMSIMILARITY_TRIPLE_DATA_GZ_FILE='/output/{0}/sentence_embedder/sentence_emb.tsv.gz'
+RETRIEVAL_MODEL_EMBEDDING_DIMENSION = 768
+RETRIEVAL_EMBEDDING_MODEL_NAME = 'all-mpnet-base-v2'
+SEMSIMILARITY_TRIPLE_DATA_GZ_FILE = '/output/{0}/sentence_embedder/sentence_emb.tsv.gz'
 SEMSIMILARITY_TRIPLE_DATA_FINETUNE_GZ_FILE='/output/spider/sentence_embedder/spider_sentence_emb_finetune.tsv.gz'
 RETRIEVAL_MODEL_DIR='/output/{0}/sentence_embedder'
 CANDIDATE_NUM=100

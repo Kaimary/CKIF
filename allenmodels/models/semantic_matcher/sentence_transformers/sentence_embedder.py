@@ -31,10 +31,11 @@ if not os.path.exists(sts_dataset_path):
 
 
 # Read the dataset
-model_name = sys.argv[1]
-train_batch_size = 15 
+dataset_name = sys.argv[1]
+model_name = sys.argv[2]
+train_batch_size = 15
 num_epochs = 10 
-model_save_path = sys.argv[2]
+model_save_path = RETRIEVAL_MODEL_DIR.format(dataset_name)
 
 
 
@@ -53,7 +54,7 @@ with gzip.open(sts_dataset_path, 'rt', encoding='utf8') as fIn:
         score = float(row['score']) / 5.0  # Normalize score to range 0 ... 1
         inp_example = InputExample(texts=[row['sentence1'], row['sentence2']], label=score)
 
-        if row['split'] == 'dev':
+        if row['mode'] == 'dev':
             dev_samples.append(inp_example)
             test_samples.append(inp_example)
         else:

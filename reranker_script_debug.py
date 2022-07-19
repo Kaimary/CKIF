@@ -91,7 +91,7 @@ def main(
         total_count = 0
         for ex in tqdm(data):
             total_count += 1
-            # if ex['index'] < 723: continue
+            # if ex['index'] < 418: continue
             db_id = ex['db_id']
             if db_id not in schema:
                 db_file = os.path.join(db_dir, db_id, db_id + ".sqlite")
@@ -252,7 +252,7 @@ def main(
         print(f"correct but go the generation count(for correct inferrence): {corr_go_gen_num}")
         print(f"failed_generation:{failed_generation}")
         checker.print_candidategen_total_result(hit_gen_num+corr_go_gen_num, candidate_num)
-        checker.export_candidategen_miss_sqls()
+        checker.export_candidategen_miss_sqls(dataset_name, model_name)
         if mode=="test": assert hit_gen_num+miss_gen_num+corr_go_gen_num == len(output)
 
     with open(DIR_PATH + output_file.format(dataset_name), 'w') as outfile:
@@ -262,12 +262,12 @@ def main(
 
 if __name__ == "__main__":
     # main()
-    dataset_file = 'datasets/spider/dev.json' #'datasets/spider/train_spider_6898.json' 
-    model_output_file = 'model_output_postprocess/outputs/ratsql/ratsql_dev_output.json'  #'model_output_postprocess/outputs/gap/gap_train_output.json' 
-    output_file =  '/output/{0}/reranker/reranker_dev.json' #'/output/{0}/reranker/reranker_train.json'
+    dataset_file = 'datasets/spider/train_spider_6898.json' #'datasets/spider/train_spider_6898.json' 
+    model_output_file = 'model_output_postprocess/outputs/gap/gap_train_output.json'  #'model_output_postprocess/outputs/gap/gap_train_output.json' 
+    output_file =  '/output/{0}/reranker/reranker_train.json' #'/output/{0}/reranker/reranker_train.json'
     main(
-        'spider', 'ratsql', 'nli-distilroberta-base-v2', 
+        'spider', 'gap', 'nli-distilroberta-base-v2', 
         dataset_file, model_output_file, 'datasets/spider/tables.json', 'datasets/spider/database', 
-        trial=1000, candidate_num=100, rewrite=False, overwrite=True, mode='test', debug=True, output_file=output_file
+        trial=1000, candidate_num=50, rewrite=False, overwrite=False, mode='train', debug=True, output_file=output_file
     )
     

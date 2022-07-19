@@ -559,37 +559,50 @@ class LowConfidenceSQLParser(object):
         else:
             res.append(cls.replace('@', ''))
             tokens = cls.split()
-            low_confidence_token = cls.split()[2]
+            ocol = cls.split()[2]
             limit = ' '.join(tokens[3:]) if len(tokens) > 3 else ""
-            assert '@' in low_confidence_token
+            asc = ""
+            # ASC LIMIT 1
+            if len(limit.split()) == 3:
+                asc = limit.split()[0]
+                limit = limit[limit.index(' ')+1:]
+            # ASC
+            elif len(limit.split()) == 1:
+                asc = limit
+                limit = ""
             # Get all possible replaceable columns 
             all_possible_columns = [f"{t.lower()}.{c.lower()}"  for t in tables for c in schema[t.lower()] if '(' not in c]
             trial = 100
-            low_conf_replacements = []
+            ocol_replacements = [ocol.replace('@', '')]
             # Iterate over each low-confidence token and do the replacement
-            while trial:
-                trial -= 1
-                tok = ""
-                # Low confidence occurred at aggregation
-                t_col = low_confidence_token.split('@')[1]
-                t_col_r = random.choice(all_possible_columns)
-                while t_col_r == t_col.lower():
+            if '@' in ocol:
+                while trial:
+                    trial -= 1
+                    tok = ""
+                    # Low confidence occurred at aggregation
+                    t_col = ocol.split('@')[1]
                     t_col_r = random.choice(all_possible_columns)
-                bagg = False
-                if random.getrandbits(1):
-                    agg = random.choice(AGG)
-                    bagg = True
-                    tok = f'{agg}('
-                if bagg: 
-                    tok += f'{t_col_r})'
-                else:
-                    tok = f'{t_col_r}'
+                    while t_col_r == t_col.lower():
+                        t_col_r = random.choice(all_possible_columns)
+                    bagg = False
+                    if random.getrandbits(1):
+                        agg = random.choice(AGG)
+                        bagg = True
+                        tok = f'{agg}('
+                    if bagg: 
+                        tok += f'{t_col_r})'
+                    else:
+                        tok = f'{t_col_r}'
 
-                if t_col_r not in low_conf_replacements: 
-                    low_conf_replacements.append(tok)
+                    if t_col_r not in ocol_replacements: 
+                        ocol_replacements.append(tok)
+            asc_replacements = ['DESC', 'ASC'] if '@' in asc else [asc]
+            limit_replacements = [limit.replace('@', ''), ''] if '@' in limit else [limit]
             # Construct the clause-string replacements
-            for tok in low_conf_replacements:
-                res.append(f'ORDER BY {tok} {limit}')
+            for col in ocol_replacements:
+                for a in asc_replacements:
+                    for l in limit_replacements:
+                        res.append(f'ORDER BY {col} {a} {l}')
 
         return res
 
