@@ -95,6 +95,7 @@ def get_low_confidence_generalized_data(
                 tokens[i] = f'@{tokens[i]}'
                 num -= 1
             inferred_query_with_marks = ' '.join(tokens)
+        # sqls_ = gen2.generate(inferred_query_with_marks, inferred_query)
         try: sqls_ = gen2.generate(inferred_query_with_marks, inferred_query)
         except:
             print(f"ERR in SQLGenV2 - {db_id}: {inferred_query_with_marks}")

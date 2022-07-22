@@ -277,6 +277,7 @@ class LowConfidenceSQLParser(object):
             trial = self._trial
             low_conf_replacements = []
             low_conf_replacements_g = []
+            low_conf_replacements_s_g = set()
             # Iterate over each low-confidence token and do the replacement
             while trial:
                 trial -= 1
@@ -324,16 +325,20 @@ class LowConfidenceSQLParser(object):
                     # else TODO Random remove any of low-confidence tokens
 
                 replacement.sort()
-                if replacement not in low_conf_replacements: 
+                gcol_r = f" GROUP BY {gcol_r}" if random.random() < 0.5 else ""
+                if (' '.join(replacement) + gcol_r) not in low_conf_replacements_s_g:
                     low_conf_replacements.append(replacement)
-                low_conf_replacements_g.append(gcol_r)
-
+                    low_conf_replacements_g.append(gcol_r)
+                low_conf_replacements_s_g.add(' '.join(replacement) + gcol_r)
             # Construct the clause-string replacements
             for low_confs, gcol in zip(low_conf_replacements, low_conf_replacements_g):
-                having = random.choice(havings)
+                if gcol:
+                    having = random.choice(havings)
+                else:
+                    having = ''
                 str = 'SELECT ' + \
-                    ' ,'.join(remove_duplicate_elms(high_conf_tokens + low_confs)) + \
-                        f' GROUP BY {gcol} {having}'
+                    ' , '.join(remove_duplicate_elms(high_conf_tokens + low_confs)) + \
+                        f'{gcol} {having}'
                 if str not in res: res.append(' '.join(str.split()))
         else:
             # Low-confidence in GROUP but not in SELECT
@@ -405,7 +410,9 @@ class LowConfidenceSQLParser(object):
                     if '@' in lc_t:
                         t_col = lc_t.split('@')[1].replace(')', '')
                         t_col_r = random.choice(all_possible_columns + ['*'])
-                        while t_col_r == t_col.lower():
+                        # TODO: ---------------------------------- FOR DEBUG ----------------------------------
+                        while t_col_r == lc_t.lower():
+                        # TODO: ********************************** END DEBUG **********************************
                             t_col_r = random.choice(all_possible_columns + ['*'])
                         replacement.append(lc_t.replace(f'@{t_col}', t_col_r))
                     else:
@@ -465,7 +472,8 @@ class LowConfidenceSQLParser(object):
             while trial:
                 trial -= 1
                 t_col_r = random.choice(all_possible_columns)
-                if f'GROUP BY {t_col_r}' not in res: res.append(f'{prefix} GROUP BY {t_col_r}')
+                replacement = f'{prefix} GROUP BY {t_col_r}'
+                if replacement not in res: res.append(replacement)
             return res
         
         res.append(f"{prefix} {cls.replace('@', '')}")
@@ -540,17 +548,26 @@ class LowConfidenceSQLParser(object):
             if '@@ORDER' in cls:
                 # Get all possible replaceable columns 
                 all_possible_columns = [f"{t.lower()}.{c.lower()}"  for t in tables for c in schema[t.lower()] if '(' not in c]
-                trial = 10
+                # TODO: ---------------------------------- FOR DEBUG ----------------------------------
+                trial = 100
+                # TODO: ********************************** END DEBUG **********************************
                 while trial:
                     trial -= 1
                     toks = ["ORDER", "BY"]
                     col = random.choice(all_possible_columns)
-                    if random.getrandbits(1):
-                        all_aggs = ['COUNT', 'AVG', 'MAX', 'MIN', 'SUM']
+                        # TODO: ---------------------------------- FOR DEBUG ----------------------------------
+                    if random.random() < 0.4:
+                        # No Order by AVG\MAX\MIN
+                        # all_aggs = ['COUNT', 'AVG', 'MAX', 'MIN', 'SUM']
+                        all_aggs = ['COUNT', 'SUM']
+                        # TODO: ********************************** END DEBUG **********************************
                         agg = random.choice(all_aggs)
                         toks.append(f'{agg}({col})')
                     else: toks.append(col)
-                    if random.getrandbits(1): toks.append(random.choice(['DESC', 'ASC']))
+                    # TODO: ---------------------------------- FOR DEBUG ----------------------------------
+                    toks.append(random.choice(['DESC', 'ASC']))
+                    # if random.getrandbits(1): toks.append(random.choice(['DESC', 'ASC']))
+                    # TODO: ********************************** END DEBUG **********************************
                     if random.getrandbits(1): toks.append('LIMIT 1')
                     o = ' '.join(toks)
                     if o not in res: res.append(o)
@@ -571,7 +588,9 @@ class LowConfidenceSQLParser(object):
                 asc = limit
                 limit = ""
             # Get all possible replaceable columns 
-            all_possible_columns = [f"{t.lower()}.{c.lower()}"  for t in tables for c in schema[t.lower()] if '(' not in c]
+            all_possible_columns = [
+                f"{t.lower()}.{c.lower()}" for t in tables for c in schema[t.lower()] if '(' not in c
+            ] + ['*']
             trial = 100
             ocol_replacements = [ocol.replace('@', '')]
             # Iterate over each low-confidence token and do the replacement
@@ -586,7 +605,7 @@ class LowConfidenceSQLParser(object):
                         t_col_r = random.choice(all_possible_columns)
                     bagg = False
                     if random.getrandbits(1):
-                        agg = random.choice(AGG)
+                        agg = random.choice(['COUNT', 'SUM'])
                         bagg = True
                         tok = f'{agg}('
                     if bagg: 
@@ -602,7 +621,8 @@ class LowConfidenceSQLParser(object):
             for col in ocol_replacements:
                 for a in asc_replacements:
                     for l in limit_replacements:
-                        res.append(f'ORDER BY {col} {a} {l}')
+                        if f'ORDER BY {col} {a} {l}' not in res and col != '*':
+                            res.append(f'ORDER BY {col} {a} {l}')
 
         return res
 
@@ -650,7 +670,9 @@ class LowConfidenceSQLParser(object):
         # 2. low-confidence assignments
         # 3. low-confidence conjunctions
         ##TODO 4. low-confidence values
-        else:
+        # TODO: ---------------------------------- FOR DEBUG ----------------------------------
+        if ' @' in cls.strip():
+        # TODO: ********************************** END DEBUG **********************************
             # res.append(cls.replace('@', ''))
             high_conf_tokens = []
             low_conf_tokens = []
@@ -677,67 +699,83 @@ class LowConfidenceSQLParser(object):
                 predicates = [p.replace('@', '') for p in low_conf_tokens + high_conf_tokens]
                 res.append(f'WHERE {predicates[0]}')
                 res.append(f'WHERE {predicates[1]}')
-            else:
-                low_conf_replacements = []
-                trial = self._trial
-                while trial:
-                    trial -= 1
-                    replacement = []
-                    for lc_t in low_conf_tokens:
-                        toks = lc_t.split()
-                        t_col = toks[0]                  
-                        symbol = toks[1]
-                        # not in
-                        if toks[1] == 'NOT': symbol = ' '.join(toks[1:3])
-                        value = toks[len(toks) - 1]
+            # else:
+            low_conf_replacements = []
+            trial = self._trial
+            while trial:
+                trial -= 1
+                replacement = []
+                for lc_t in low_conf_tokens:
+                    toks = lc_t.split()
+                    t_col = toks[0]
+                    symbol = toks[1]
+                    # not in
+                    if toks[1] == 'NOT': symbol = ' '.join(toks[1:3])
+                    value = toks[len(toks) - 1]
 
-                        predicate_add = ""
-                        if '@' in t_col:
-                            t_col_r = random.choice(all_possible_columns)
-                            while t_col_r == t_col.lower():
-                                t_col_r = random.choice(all_possible_columns)
-                            t_col = t_col_r
-                        if '@' in symbol:
-                            all_symbols = ['>', '=', '<', '!=', '>=', '<=']
-                            # Generate one more predicate if symbol is low-confidence
-                            if random.getrandbits(1) and random.getrandbits(1):
-                                symbol = symbol.replace('@', '')
-                                t_col_a = random.choice(all_possible_columns)
-                                symbol_a = random.choice(all_symbols)
-                                predicate_add = f'AND {t_col_a} {symbol_a} {value}'
+                    predicate_add = ""
+                    if '@' in t_col:
+                        t_col_r = random.choice(all_possible_columns)
+                        # TODO: ---------------------------------- FOR DEBUG ----------------------------------
+                        # while t_col_r == t_col.lower():
+                        #     t_col_r = random.choice(all_possible_columns)
+                        # TODO: ********************************** END DEBUG **********************************
+                        t_col = t_col_r
+                    if '@' in symbol:
+                        # TODO: ---------------------------------- FOR DEBUG ----------------------------------
+                        all_symbols = ['>', '=', '<', '!=', '>=', '<=', "BETWEEN 'terminal' AND"]
+                        # TODO: ********************************** END DEBUG **********************************
+                        # Generate one more predicate if symbol is low-confidence
+                        if random.getrandbits(1) and random.getrandbits(1):
+                            symbol = symbol.replace('@', '')
+                            t_col_a = random.choice(all_possible_columns)
+                            symbol_a = random.choice(all_symbols)
+                            predicate_add = f'AND {t_col_a} {symbol_a} {value}'
+                        else:
+                            # TODO: ---------------------------------- FOR DEBUG ----------------------------------
+                            # if 'LIKE' not in symbol: all_symbols.remove(symbol.replace('@', ''))
+                            # TODO: ********************************** END DEBUG **********************************
+                            symbol = random.choice(all_symbols)
+                    elif any('@' in c for c in conj_tokens):
+                        all_symbols = ['>', '=', '<', '!=', '>=', '<=', "BETWEEN 'terminal' AND"]
+                        if random.getrandbits(1) and random.getrandbits(1):
+                            symbol = symbol.replace('@', '')
+                            t_col_a = random.choice(all_possible_columns)
+                            symbol_a = random.choice(all_symbols)
+                            if any(f"{t_col_a} {symbol_a} {value}" in h for h in high_conf_tokens):
+                                predicate_add = ''
                             else:
-                                if 'LIKE' not in symbol: all_symbols.remove(symbol.replace('@', ''))
-                                symbol = random.choice(all_symbols)
-                        
-                        if predicate_add: predicate = ' '.join([t_col, symbol, value, predicate_add])
-                        elif symbol == 'BETWEEN': predicate = ' '.join([t_col, symbol, value, 'AND', value])
-                        else: predicate = ' '.join([t_col, symbol, value])
-                        if predicate not in replacement: replacement.append(predicate)
-                        replacement.sort()
-                        if replacement not in low_conf_replacements: 
-                            low_conf_replacements.append(replacement)
-                # Construct the clause-string replacements
-                template = 'WHERE '
-                conj_idx = 0
-                idx = 0
-                for t in high_conf_tokens:
-                    idx += 1
-                    if idx > 1: 
-                        template += ' ' + conj_tokens[conj_idx]
-                        conj_idx += 1
-                    template += ' ' + t
-                    
-                for rep in low_conf_replacements:
-                    template1 = template
-                    idx1 = idx
-                    conj_idx1 = conj_idx
-                    for tt in rep:
-                        idx1 += 1
-                        if idx1 > 1: 
-                            template1 += ' ' + conj_tokens[conj_idx1]
-                            conj_idx1 += 1
-                        template1 += ' ' + tt
+                                predicate_add = f'AND {t_col_a} {symbol_a} {value}'
 
-                    res.append(template1)
+                    if predicate_add: predicate = ' '.join([t_col, symbol, value, predicate_add])
+                    elif symbol == 'BETWEEN': predicate = ' '.join([t_col, symbol, value, 'AND', value])
+                    else: predicate = ' '.join([t_col, symbol, value])
+                    if predicate not in (replacement + high_conf_tokens): replacement.append(predicate)
+                    replacement.sort()
+                    if replacement not in low_conf_replacements:
+                        low_conf_replacements.append(replacement)
+            # Construct the clause-string replacements
+            template = 'WHERE '
+            conj_idx = 0
+            idx = 0
+            for t in high_conf_tokens:
+                idx += 1
+                if idx > 1:
+                    template += ' ' + conj_tokens[conj_idx].replace('@', '')
+                    conj_idx += 1
+                template += ' ' + t
+
+            for rep in low_conf_replacements:
+                template1 = template
+                idx1 = idx
+                conj_idx1 = conj_idx
+                for tt in rep:
+                    idx1 += 1
+                    if idx1 > 1:
+                        template1 += ' ' + conj_tokens[conj_idx1].replace('@', '')
+                        conj_idx1 += 1
+                    template1 += ' ' + tt
+
+                res.append(template1)
 
         return res

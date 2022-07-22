@@ -135,7 +135,7 @@ class GeneratorV2(object):
         sql_map_set = set()
         hit = 0
 
-        while hit < trial:
+        while hit < trial and len(res) < trial * 10:
             sql = []
             for idx, clauses in enumerate(argv):
                 if clauses: 
