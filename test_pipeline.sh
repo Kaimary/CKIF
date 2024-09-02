@@ -77,6 +77,7 @@ FINAL_OUTPUT_FILE="${EXPERIMENT_DIR_NAME}/pred_final.txt"
 
 # Generalize SQL-Dialects for the test data
 echo "ACTION REPORT: Generalize the sqls(and dialects) for the test data "
+echo "python3 -m datagen.generalization_script $DATASET_NAME $MODEL_NAME $TEST_FILE $MODEL_OUTPUT_FILE $TABLES_FILE $DB_DIR $TRIAL_KNOB $REWRITE_FLAG $OVERWRITE_FALG $MODE"
 python3 -m datagen.generalization_script $DATASET_NAME $MODEL_NAME $TEST_FILE $MODEL_OUTPUT_FILE \
 $TABLES_FILE $DB_DIR $TRIAL_KNOB $REWRITE_FLAG $OVERWRITE_FALG $MODE
 echo "RESULT REPORT: Test data generalization is done!"
@@ -85,6 +86,7 @@ echo "=================================================================="
 # Generate the input data for the re-ranking model 
 if [ ! -f $RERANKER_INPUT_FILE ]; then
     echo "ACTION REPORT: Generate re-ranking model's input data to $RERANKER_INPUT_FILE"
+    echo "python3 -m datagen.reranker_script $DATASET_NAME $MODEL_NAME $RETRIEVAL_EMBEDDING_MODEL_NAME $TEST_FILE $MODEL_OUTPUT_FILE $TABLES_FILE $DB_DIR $CANDIDATE_NUM $TRIAL_KNOB $REWRITE_FLAG $OVERWRITE_FALG $MODE $DEBUG $RERANKER_INPUT_FILE"
     python3 -m datagen.reranker_script $DATASET_NAME $MODEL_NAME $RETRIEVAL_EMBEDDING_MODEL_NAME \
     $TEST_FILE $MODEL_OUTPUT_FILE $TABLES_FILE $DB_DIR \
     $CANDIDATE_NUM $TRIAL_KNOB $REWRITE_FLAG $OVERWRITE_FALG $MODE $DEBUG $RERANKER_INPUT_FILE
@@ -104,6 +106,7 @@ fi
 # Inference for top-1
 if [ -f $RERANKER_MODEL_FILE -a ! -f $RERANKER_MODEL_OUTPUT_FILE ]; then
     echo "ACTION REPORT: Start to infer the top-1 results using the re-ranking model $RERANKER_MODEL_FILE"
+    echo "allennlp predict $RERANKER_MODEL_FILE $RERANKER_INPUT_FILE --output-file $RERANKER_MODEL_OUTPUT_FILE --file-friendly-logging --silent --predictor listwise-ranker --use-dataset-reader --cuda-device 0 --include-package allenmodels.dataset_readers.listwise_pair_reader --include-package allenmodels.models.semantic_matcher.listwise_pair_ranker --include-package allenmodels.predictors.ranker_predictor"
     allennlp predict "$RERANKER_MODEL_FILE" "$RERANKER_INPUT_FILE" \
     --output-file "$RERANKER_MODEL_OUTPUT_FILE" \
     --file-friendly-logging --silent --predictor listwise-ranker --use-dataset-reader --cuda-device 0 \
@@ -126,6 +129,7 @@ fi
 # Evaluate re-ranker model
 if [ -f $RERANKER_MODEL_OUTPUT_FILE -a ! -f $RERANKER_MODEL_OUTPUT_SQL_FILE ]; then
     echo "ACTION REPORT: Start to evaluate the re-ranking model (top-1 results) and generate top-1 sql file......"
+    echo "python3 -m eval_scripts.reranker_evaluate $TABLES_FILE $DB_DIR $RERANKER_MODEL_OUTPUT_FILE $RERANKER_INPUT_FILE $EXPERIMENT_DIR_NAME"
     python3 -m eval_scripts.reranker_evaluate $TABLES_FILE $DB_DIR $RERANKER_MODEL_OUTPUT_FILE \
     $RERANKER_INPUT_FILE $EXPERIMENT_DIR_NAME
     echo "RESULT REPORT: Re-ranking model evaluation complete!"
@@ -144,6 +148,7 @@ fi
 # Inference for top-k
 if [ -f $RERANKER_MODEL_FILE -a ! -f $RERANKER_MODEL_OUTPUT_TOPK_FILE ]; then
     echo "ACTION REPORT: Start to infer the top-k results using the re-ranking model $RERANKER_MODEL_FILE"
+    echo "allennlp predict $RERANKER_MODEL_FILE $RERANKER_INPUT_FILE --output-file $RERANKER_MODEL_OUTPUT_TOPK_FILE --file-friendly-logging --silent --predictor listwise-ranker --use-dataset-reader --cuda-device 0 --include-package allenmodels.dataset_readers.listwise_pair_reader --include-package allenmodels.models.semantic_matcher.listwise_pair_ranker --include-package allenmodels.predictors.ranker_predictor_topk"
     allennlp predict "$RERANKER_MODEL_FILE" "$RERANKER_INPUT_FILE" \
     --output-file "$RERANKER_MODEL_OUTPUT_TOPK_FILE" \
     --file-friendly-logging --silent --predictor listwise-ranker --use-dataset-reader --cuda-device 0 \
@@ -167,6 +172,7 @@ fi
 # Evaluate for top-k
 if [ -f $RERANKER_MODEL_OUTPUT_TOPK_FILE -a ! -f $RERANKER_MODEL_OUTPUT_TOPK_SQL_FILE ]; then
     echo "ACTION REPORT: Start to evaluate the re-ranking model (top-k results) and generate top-k sql file......"
+    echo "python3 -m eval_scripts.reranker_evaluate_topk $TABLES_FILE $DB_DIR $RERANKER_MODEL_OUTPUT_TOPK_FILE $RERANKER_INPUT_FILE $EXPERIMENT_DIR_NAME"
     python3 -m eval_scripts.reranker_evaluate_topk $TABLES_FILE $DB_DIR \
     $RERANKER_MODEL_OUTPUT_TOPK_FILE $RERANKER_INPUT_FILE $EXPERIMENT_DIR_NAME
     echo "RESULT REPORT: Top-k result generate complete!"
@@ -186,6 +192,7 @@ fi
 # Value filtered
 if [ -f $RERANKER_MODEL_OUTPUT_SQL_FILE -a ! -f $VALUE_FILTERED_OUTPUT_TOPK_SQL_FILE ]; then
     echo "Value filter stage starting..."
+    echo "python3 -m value_mathcing.candidate_filter_top10 $TEST_FILE $RERANKER_INPUT_FILE $RERANKER_MODEL_OUTPUT_TOPK_SQL_FILE $TABLES_FILE $DB_DIR $VALUE_FILTERED_OUTPUT_SQL_FILE $VALUE_FILTERED_OUTPUT_TOPK_SQL_FILE"
     python3 -m value_mathcing.candidate_filter_top10 "$TEST_FILE" "$RERANKER_INPUT_FILE" \
     "$RERANKER_MODEL_OUTPUT_TOPK_SQL_FILE" "$TABLES_FILE" "$DB_DIR" \
     "$VALUE_FILTERED_OUTPUT_SQL_FILE" "$VALUE_FILTERED_OUTPUT_TOPK_SQL_FILE"

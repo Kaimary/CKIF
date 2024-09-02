@@ -77,7 +77,7 @@ def get_low_confidence_generalized_data(
 
     sqls = []
     dialects = []
-    if not os.path.exists(serialization_file) or overwrite:
+    if overwrite or not os.path.exists(serialization_file):
         # Create an empty serialization file first
         datafile = open(serialization_file, 'w')
         gen2 = GeneratorV2(dataset_file, tables_file, db_dir, trial=trial)
@@ -95,8 +95,11 @@ def get_low_confidence_generalized_data(
                 tokens[i] = f'@{tokens[i]}'
                 num -= 1
             inferred_query_with_marks = ' '.join(tokens)
+            inferred_query_with_marks = inferred_query_with_marks.replace(' @, ', ' , ')
         # sqls_ = gen2.generate(inferred_query_with_marks, inferred_query)
         try: sqls_ = gen2.generate(inferred_query_with_marks, inferred_query)
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt
         except:
             print(f"ERR in SQLGenV2 - {db_id}: {inferred_query_with_marks}")
             os.remove(serialization_file)
@@ -109,6 +112,8 @@ def get_low_confidence_generalized_data(
                 dialect = convert_sql_to_dialect(sql_dict, table_dict, schema_)
                 sqls.append(sql)
                 dialects.append(dialect)
+            except KeyboardInterrupt:
+                raise KeyboardInterrupt
             except: pass
         # Invalid sql
         if not sqls: return sqls, dialects

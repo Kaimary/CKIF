@@ -41,7 +41,11 @@ class RecallChecker():
                 # query = ex['query']
                 ex = fix_number_value(ex)
                 query = fix_query_toks_no_value(ex['query_toks_no_value'])
-                g_sql = rebuild_sql(db_id, self.db_dir, sql_nested_query_tmp_name_convert(query), self.kmaps, tables_file)
+                try:
+                    g_sql = rebuild_sql(db_id, self.db_dir, sql_nested_query_tmp_name_convert(query), self.kmaps, tables_file)
+                except Exception as e:
+                    print(e)
+                    continue
                 if g_sql not in self.gold_sql_dicts[db_id]:
                     self.gold_sqls[db_id].add(query)
                     self.gold_sql_dicts[db_id].append(g_sql)

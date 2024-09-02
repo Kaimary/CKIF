@@ -39,9 +39,9 @@
     "trainer": {
         "cuda_device": 0,
         "learning_rate_scheduler": {
-            "factor": 0.5,
-            "mode": "max",
-            "patience": 0,
+            "factor": 0.9,
+            "mode": "auto",
+            "patience": 10,
             "type": "reduce_on_plateau"
         },
         "num_epochs": 50,
@@ -50,7 +50,8 @@
             "type": "adam"
         },
         "patience": 10,
-        "validation_metric": "+ndcg"
+        "validation_metric": "+ndcg",
+        "num_gradient_accumulation_steps": 2
     },
     "validation_data_path": "/home/kaimary/GAR/output/spider/reranker/reranker_dev.json",
     "validation_dataset_reader": {

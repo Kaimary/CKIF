@@ -41,6 +41,10 @@ def main(dataset_name, model_name, dataset_file, model_output_file, tables_file,
     table = {}
     table_dict = {}
     serialization_dir = f'{DIR_PATH}{SERIALIZE_DATA_DIR.format(dataset_name)}/{model_name}/{trial}/{mode}'
+    if os.path.exists(serialization_dir):
+        option = input(f"{serialization_dir} exists, skip the gen stage? [Yy/Nn]")
+        if option.lower() == 'y':
+            return
     with open(model_output_file, 'r') as data_file:
         data = json.load(data_file)
         for ex in tqdm(data):

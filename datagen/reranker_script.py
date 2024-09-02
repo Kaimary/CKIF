@@ -29,10 +29,10 @@ from spider_utils.recall_checker_utils import RecallChecker
 @click.argument("db_dir", type=click.Path(exists=True, dir_okay=True))
 @click.argument("candidate_num", default=300)
 @click.argument("trial", default=100)
-@click.argument("rewrite", default=False)
-@click.argument("overwrite", default=False)
+@click.argument("rewrite", default=False, type=bool)
+@click.argument("overwrite", default=False, type=bool)
 @click.argument("mode", default="train")
-@click.argument("debug", default=False)
+@click.argument("debug", default=False, type=bool)
 @click.argument("output_file", type=click.Path(exists=False, dir_okay=False))
 def main(
     dataset_name, model_name, retrieval_model_name, 
@@ -72,7 +72,7 @@ def main(
     embedder = SentenceTransformer(
         DIR_PATH + RETRIEVAL_MODEL_DIR.format(dataset_name) + '/' + retrieval_model_name)
     checker = RecallChecker(dataset_file, tables_file, db_dir)
-    if debug: 
+    if debug:
         # Statistics (debug purpose)
         model_corr_num = 0
         model_incorr_num = 0

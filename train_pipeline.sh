@@ -56,11 +56,18 @@ RERANKER_TRAIN_DATA_FILE=$(cut -d'@' -f6 <<< "$output")
 RERANKER_DEV_DATA_FILE=$(cut -d'@' -f7 <<< "$output")
 RERANKER_CONFIG_FILE=$(cut -d'@' -f8 <<< "$output")
 RERANKER_MODEL_DIR=$(cut -d'@' -f9 <<< "$output")
-TRIAL_KNOB=$(cut -d'@' -f10 <<< "$output")
-REWRITE_FLAG=$(cut -d'@' -f11 <<< "$output")
-OVERWRITE_FALG=$(cut -d'@' -f12 <<< "$output")
-MODE=$(cut -d'@' -f13 <<< "$output")
-DEBUG=$(cut -d'@' -f14 <<< "$output")
+PRED_TOPK_FILE_NAME=$(cut -d'@' -f10 <<< "$output")
+TRIAL_KNOB=$(cut -d'@' -f11 <<< "$output")
+CANDIDATE_NUM=$(cut -d'@' -f12 <<< "$output")
+REWRITE_FLAG=$(cut -d'@' -f13 <<< "$output")
+OVERWRITE_FALG=$(cut -d'@' -f14 <<< "$output")
+MODE=$(cut -d'@' -f15 <<< "$output")
+DEBUG=$(cut -d'@' -f16 <<< "$output")
+echo "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+echo "python3 -m datagen.generalization_script $DATASET_NAME $MODEL_NAME $TRAIN_FILE $MODEL_TRAIN_OUTPUT_FILE $TABLES_FILE $DB_DIR $TRIAL_KNOB $REWRITE $OVERWRITE $MODE"
+echo "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+
+
 RETRIEVAL_MODEL_DIR=$RETRIEVAL_MODEL_DIR/$RETRIEVAL_EMBEDDING_MODEL_NAME
 RERANKER_MODEL_DIR=$RERANKER_MODEL_DIR/$RERANKER_MODEL_NAME\_$RERANKER_EMBEDDING_MODEL_NAME
 
@@ -103,8 +110,14 @@ else
     esac
 fi
 
+echo "##############################################################################"
+echo "python3 -m datagen.reranker_script $DATASET_NAME $MODEL_NAME $RETRIEVAL_EMBEDDING_MODEL_NAME $TRAIN_FILE $MODEL_TRAIN_OUTPUT_FILE $TABLES_FILE $DB_DIR $CANDIDATE_NUM $TRIAL_KNOB $REWRITE_FLAG $OVERWRITE_FALG $MODE $DEBUG $RERANKER_TRAIN_DATA_FILE"
+echo "python3 -m datagen.reranker_script $DATASET_NAME $MODEL_NAME $RETRIEVAL_EMBEDDING_MODEL_NAME $DEV_FILE $MODEL_DEV_OUTPUT_FILE $TABLES_FILE $DB_DIR $CANDIDATE_NUM $TRIAL_KNOB $REWRITE_FLAG $OVERWRITE_FALG $MODE $DEBUG $RERANKER_DEV_DATA_FILE"
+echo "##############################################################################"
+
 if [ ! -f $RERANKER_TRAIN_DATA_FILE ]; then
     echo "ACTION REPORT: Generate the re-ranking model's train data ......"
+    echo "python3 -m datagen.reranker_script $DATASET_NAME $MODEL_NAME $RETRIEVAL_EMBEDDING_MODEL_NAME $TRAIN_FILE $MODEL_TRAIN_OUTPUT_FILE $TABLES_FILE $DB_DIR $CANDIDATE_NUM $TRIAL_KNOB $REWRITE_FLAG $OVERWRITE_FALG $MODE $DEBUG $RERANKER_TRAIN_DATA_FILE"
     python3 -m datagen.reranker_script $DATASET_NAME $MODEL_NAME \
     $RETRIEVAL_EMBEDDING_MODEL_NAME $TRAIN_FILE $MODEL_TRAIN_OUTPUT_FILE $TABLES_FILE $DB_DIR \
     $CANDIDATE_NUM $TRIAL_KNOB $REWRITE_FLAG $OVERWRITE_FALG $MODE $DEBUG $RERANKER_TRAIN_DATA_FILE
@@ -132,6 +145,12 @@ else
         * ) echo "Please answer yes or no.";;
     esac
 fi
+
+echo "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+echo "python3 -m configs.update_config $RERANKER_CONFIG_FILE $RERANKER_EMBEDDING_MODEL_NAME $RERANKER_TRAIN_DATA_FILE $RERANKER_DEV_DATA_FILE"
+echo "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+echo "allennlp train $RERANKER_CONFIG_FILE -s $RERANKER_MODEL_DIR --include-package allenmodels.dataset_readers.listwise_pair_reader --include-package allenmodels.models.semantic_matcher.listwise_pair_ranker"
+echo "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
 if [ ! -d $RERANKER_MODEL_DIR ]; then
     echo "=================================================================="
