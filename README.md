@@ -1,4 +1,4 @@
-# A Confidence-based Knowledge Integration Framework for Cross-DomainTable Question Answering
+# A Confidence-based Knowledge Integration Framework for Cross-Domain Table Question Answering
 
 ## Setup
 
