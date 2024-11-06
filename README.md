@@ -1,5 +1,23 @@
 # A Confidence-based Knowledge Integration Framework for Cross-Domain Table Question Answering
 
+The official repository contains the code and models for our paper [A Confidence-based Knowledge Integration Framework for Cross-Domain Table Question Answering](https://ieeexplore.ieee.org/document/xxx). *2024 Knowledge-Based Systems Journal (KBS).*
+
+<p align="center">
+   <a href="https://github.com/kaimary/CKIF/blob/main/LICENSE">
+        <img alt="license" src="https://img.shields.io/github/license/kaimary/CKIF.svg?color=blue">
+   </a>
+   <a href="https://github.com/kaimary/CKIF/stargazers">
+       <img alt="stars" src="https://img.shields.io/github/stars/kaimary/CKIF" />
+  	</a>
+  	<a href="https://github.com/kaimary/CKIF/network/members">
+       <img alt="FORK" src="https://img.shields.io/github/forks/kaimary/CKIF?color=FF8000" />
+  	</a>
+    <a href="https://github.com/kaimary/CKIF/issues">
+      <img alt="Issues" src="https://img.shields.io/github/issues/kaimary/CKIF?color=0088ff"/>
+    </a>
+    <br />
+</p>
+
 ## Setup
 
 Download the Spider dataset and put the data in `datasets` folder in the root directory
