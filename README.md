@@ -1,4 +1,4 @@
-# Generate-and-Rank strategy for Sequence-to-Sequence Semantic Parsers
+# A Confidence-based Knowledge Integration Framework for Cross-DomainTable Question Answering
 
 ## Setup
 
