@@ -1,6 +1,6 @@
 # A Confidence-based Knowledge Integration Framework for Cross-Domain Table Question Answering
 
-The official repository contains the code and models for our paper [A Confidence-based Knowledge Integration Framework for Cross-Domain Table Question Answering](https://ieeexplore.ieee.org/document/xxx). *2024 Knowledge-Based Systems Journal (KBS).*
+The official repository contains the code and models for our paper [A Confidence-based Knowledge Integration Framework for Cross-Domain Table Question Answering](https://authors.elsevier.com/sd/article/S0950-7051(24)01352-2). *2024 Knowledge-Based Systems Journal (KBS).*
 
 <p align="center">
    <a href="https://github.com/kaimary/CKIF/blob/main/LICENSE">
