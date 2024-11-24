@@ -18,6 +18,22 @@ The official repository contains the code and models for our paper [A Confidence
     <br />
 </p>
 
+If you use our code in your study, or find CKIF useful, please cite it as follows:
+
+```bibtex
+@article{Yuankai2024:CKIF,
+   author = {Yuankai Fan, Tonghui Ren, Can Huang, Beini Zheng, Yinan Jing, Zhenying He, Jinbao Li, Jianxin Li},
+   title = {A confidence-based knowledge integration framework for cross-domain table question answering},
+   journal = {Knowledge-Based Systems},
+   volume = {306},
+   pages = {112718},
+   year = {2024},
+   issn = {0950-7051},
+   doi = {https://doi.org/10.1016/j.knosys.2024.112718},
+   url = {https://www.sciencedirect.com/science/article/pii/S0950705124013522}
+}
+```
+
 ## Setup
 
 Download the Spider dataset and put the data in `datasets` folder in the root directory
