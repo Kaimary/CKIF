@@ -39,7 +39,7 @@ If you use our code in your study, or find CKIF useful, please cite it as follow
 Download the Spider dataset and put the data in `datasets` folder in the root directory
 
 ## Postprocessing on model raw output
-Before making inference with GAR, we need to format the outputs of any Seq2Seq models first. Please check the README in the `model_output_postprocess` folder for the details.
+Before making inference with CKIF, we need to format the outputs of any Seq2Seq models first. Please check the README in the `model_output_postprocess` folder for the details.
 
 The postprocessing of model `GAP`, `RAT-SQL` and `BRIDGE` has been added in the `model_output_postprocess.py` file in the root directory.
 
